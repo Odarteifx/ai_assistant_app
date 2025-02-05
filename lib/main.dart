@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'screens/onboarding_screen.dart';
 
 void main() {
@@ -15,16 +16,18 @@ class MyApp extends StatelessWidget {
     return ScreenUtilInit(
       designSize: const Size(390, 844),
       builder: (context, child) {
-        return MaterialApp(
+        return ShadApp(
           debugShowCheckedModeBanner: false,
-      title: 'Nova',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-        textTheme: GoogleFonts.firaCodeTextTheme().apply(bodyColor: Colors.black) ,
-      ),
-      home: const AiAsistantApp(),
-    );
+          title: 'Nova',
+          theme: ShadThemeData(
+              colorScheme: const ShadZincColorScheme.light(),
+              brightness: Brightness.light,
+              textTheme: ShadTextTheme.fromGoogleFont(GoogleFonts.firaCode)),
+          darkTheme: ShadThemeData(
+              colorScheme: const ShadZincColorScheme.dark(),
+              brightness: Brightness.dark),
+          home: const AiAsistantApp(),
+        );
       },
     );
   }
