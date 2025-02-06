@@ -22,16 +22,13 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'Nova',
           theme: ShadThemeData(
-              colorScheme:  ShadZincColorScheme.light(
-                background: AppColor.backgroundColor
-              ),
+              colorScheme: ShadZincColorScheme.light(
+                  background: AppColor.backgroundColor),
               brightness: Brightness.light,
-              textTheme: ShadTextTheme.fromGoogleFont(GoogleFonts.poppins)
-              ),
+              textTheme: ShadTextTheme.fromGoogleFont(GoogleFonts.poppins)),
           darkTheme: ShadThemeData(
-              colorScheme: const ShadZincColorScheme.dark(
-                background: Color(0xFF121212)
-              ),
+              colorScheme:
+                  const ShadZincColorScheme.dark(background: Color(0xFF121212)),
               brightness: Brightness.dark),
           routerConfig: router,
         );

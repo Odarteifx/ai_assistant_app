@@ -13,7 +13,7 @@ class AiOnboarding extends StatefulWidget {
 class _AiOnboardingState extends State<AiOnboarding> {
   @override
   void initState() {
-    Future.delayed(const Duration(seconds: 5),() => context.go('/signin'));
+    Future.delayed(const Duration(seconds: 5), () => context.go('/signin'));
     super.initState();
   }
 
@@ -27,7 +27,11 @@ class _AiOnboardingState extends State<AiOnboarding> {
             colors: [Color(0xFFFF66C4), Color(0xFFFFde59)],
           ),
         ),
-        child: Center(child: Image.asset(AiAssets.novaIcon, width: 250.sp,)),
+        child: Center(
+            child: Image.asset(
+          AiAssets.novaIcon,
+          width: 250.sp,
+        )),
       ),
     );
   }

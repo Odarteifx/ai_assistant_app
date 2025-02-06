@@ -1,21 +1,23 @@
-import 'package:ai_assistant_app/constants/ai_assets.dart';
-import 'package:ai_assistant_app/constants/colors.dart';
-import 'package:ai_assistant_app/constants/typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-class SigninScreen extends StatefulWidget {
-  const SigninScreen({super.key});
+import '../constants/ai_assets.dart';
+import '../constants/typography.dart';
+
+class SignupScreen extends StatefulWidget {
+  const SignupScreen({super.key});
 
   @override
-  State<SigninScreen> createState() => _SigninScreenState();
+  State<SignupScreen> createState() => _SignupScreenState();
 }
 
 final _formkey = GlobalKey<ShadFormState>();
 final TextEditingController _emailAddress = TextEditingController();
 final TextEditingController _password = TextEditingController();
+  final TextEditingController _username = TextEditingController();
+  final TextEditingController _confirmPassword = TextEditingController();
 
 @override
 void dispose() {
@@ -23,8 +25,8 @@ void dispose() {
   _password.dispose();
 }
 
-class _SigninScreenState extends State<SigninScreen> {
-  bool obscure = true;
+class _SignupScreenState extends State<SignupScreen> {
+   bool obscure = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,7 +49,7 @@ class _SigninScreenState extends State<SigninScreen> {
               ],
             ),
             Text(
-              'Welcome Back to Nova AI',
+              'Welcome to Nova AI',
               style: TextStyle(
                   fontSize: AppFontSize.onboadingbody,
                   fontWeight: AppFontWeight.bold),
@@ -69,6 +71,13 @@ class _SigninScreenState extends State<SigninScreen> {
                   child: Column(
                     spacing: 10.sp,
                     children: [
+                      ShadInputFormField(
+                        controller: _username,
+                        keyboardType: TextInputType.emailAddress,
+                        inputPadding: EdgeInsets.symmetric(vertical: 6.sp),
+                        id: 'name',
+                        placeholder: const Text('Full name'),
+                      ),
                       ShadInputFormField(
                         controller: _emailAddress,
                         keyboardType: TextInputType.emailAddress,
@@ -97,81 +106,46 @@ class _SigninScreenState extends State<SigninScreen> {
                         obscureText: obscure,
                         placeholder: const Text('Password'),
                       ),
+                      ShadInputFormField(
+                        controller: _confirmPassword,
+                        id: 'Confirm password',
+                        prefix: Padding(
+                          padding: EdgeInsets.all(4.sp),
+                          child: const Icon(LucideIcons.lock),
+                        ),
+                        suffix: ShadButton(
+                          width: 24.w,
+                          height: 24.h,
+                          icon: Icon(
+                              obscure ? LucideIcons.eyeOff : LucideIcons.eye),
+                          onPressed: () {
+                            setState(() {
+                              obscure = !obscure;
+                            });
+                          },
+                        ),
+                        obscureText: obscure,
+                        placeholder: const Text('Confirm Password'),
+                      ),
                       Column(
                         children: [
                           Row(
                             children: [
                               Expanded(
                                 child: ShadButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    //verification & navigate to Main Screen
+                                  },
                                   height: 48.sp,
                                   backgroundColor: const Color(0xFFE344A6),
                                   pressedBackgroundColor:
                                       const Color(0xFFCA4E9A),
                                   child: const Text(
-                                    'Continue with Email',
+                                    'Create Account',
                                   ),
                                 ),
                               ),
                             ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              ShadButton.ghost(
-                                size: ShadButtonSize.sm,
-                                height: 15.sp,
-                                child: Text(
-                                  'Forgot Password?',
-                                  style: TextStyle(
-                                      fontSize: AppFontSize.termsfont,
-                                      color: Colors.grey),
-                                ),
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
-                      const Text('OR'),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ShadButton(
-                              onPressed: () {},
-                              height: 48.sp,
-                              decoration: ShadDecoration(
-                                  border: ShadBorder.all(
-                                      color: const Color(0xFFE0E0E0),
-                                      style: BorderStyle.solid,
-                                      width: 1.w)),
-                              backgroundColor: AppColor.backgroundColor,
-                              pressedBackgroundColor: const Color(0xFFE0E0E0),
-                              icon: Image.asset(
-                                AiAssets.googleIcon,
-                                height: 18.sp,
-                              ),
-                              child: const Text(
-                                'Continue with Google',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ShadButton(
-                              onPressed: () {},
-                              height: 48.sp,
-                              icon: Image.asset(
-                                AiAssets.appleIcon,
-                                height: 20.sp,
-                              ),
-                              child: const Text(
-                                'Continue with Apple',
-                              ),
-                            ),
                           ),
                         ],
                       ),
@@ -187,12 +161,12 @@ class _SigninScreenState extends State<SigninScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text(
-                            'Don\'t have an Account?  ',
+                            'Already have an Account?  ',
                             textAlign: TextAlign.center,
                           ),
                           GestureDetector(
-                              onTap: () => context.go('/signup'),
-                              child: const Text('Create Account',
+                              onTap: () => context.go('/signin'),
+                              child: const Text('Log In',
                                   style: TextStyle(color: Color(0xFFE344A6))))
                         ],
                       )
