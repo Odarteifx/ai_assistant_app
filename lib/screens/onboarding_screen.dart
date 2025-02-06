@@ -1,6 +1,7 @@
 import 'package:ai_assistant_app/constants/ai_assets.dart';
 import 'package:ai_assistant_app/screens/singin_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class AiOnboarding extends StatefulWidget {
   const AiOnboarding({super.key});
@@ -12,13 +13,8 @@ class AiOnboarding extends StatefulWidget {
 class _AiOnboardingState extends State<AiOnboarding> {
   @override
   void initState() {
-    Future.delayed(const Duration(seconds: 5), () {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const SigninScreen(),
-          ));
-    });
+    Future.delayed(const Duration(seconds: 5),() => context.go('/signin') 
+    );
     super.initState();
   }
 

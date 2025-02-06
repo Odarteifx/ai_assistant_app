@@ -1,3 +1,5 @@
+import 'package:ai_assistant_app/constants/colors.dart';
+import 'package:ai_assistant_app/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,17 +18,22 @@ class MyApp extends StatelessWidget {
     return ScreenUtilInit(
       designSize: const Size(390, 844),
       builder: (context, child) {
-        return ShadApp(
+        return ShadApp.router(
           debugShowCheckedModeBanner: false,
           title: 'Nova',
           theme: ShadThemeData(
-              colorScheme: const ShadZincColorScheme.light(),
+              colorScheme:  ShadZincColorScheme.light(
+                background: AppColor.backgroundColor
+              ),
               brightness: Brightness.light,
-              textTheme: ShadTextTheme.fromGoogleFont(GoogleFonts.firaCode)),
+              textTheme: ShadTextTheme.fromGoogleFont(GoogleFonts.poppins)
+              ),
           darkTheme: ShadThemeData(
-              colorScheme: const ShadZincColorScheme.dark(),
+              colorScheme: const ShadZincColorScheme.dark(
+                background: Color(0xFF121212)
+              ),
               brightness: Brightness.dark),
-          home: const AiAsistantApp(),
+          routerConfig: router,
         );
       },
     );
