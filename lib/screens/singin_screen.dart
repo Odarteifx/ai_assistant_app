@@ -110,18 +110,10 @@ class _SigninScreenState extends State<SigninScreen> {
                                   width: 1.w)),
                           backgroundColor: AppColor.backgroundColor,
                           pressedBackgroundColor: const Color(0xFFE0E0E0),
-                          child: Row(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 7),
-                                child: Image.asset(AiAssets.googleIcon),
-                              ),
-                              const Text(
-                                'Continue with Google',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ],
+                          icon: Image.asset(AiAssets.googleIcon, height: 18.sp,),
+                          child: const Text(
+                            'Continue with Google',
+                            style: TextStyle(color: Colors.black),
                           ),
                         ),
                       ),
@@ -133,17 +125,9 @@ class _SigninScreenState extends State<SigninScreen> {
                         child: ShadButton(
                           onPressed: () {},
                           height: 48.sp,
-                          child: Row(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 7, vertical: 6),
-                                child: Image.asset(AiAssets.appleIcon),
-                              ),
-                              const Text(
-                                'Continue with Apple',
-                              ),
-                            ],
+                          icon: Image.asset(AiAssets.appleIcon, height: 20.sp,),
+                          child: const Text(
+                            'Continue with Apple',
                           ),
                         ),
                       ),

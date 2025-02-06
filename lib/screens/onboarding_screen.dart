@@ -1,6 +1,6 @@
 import 'package:ai_assistant_app/constants/ai_assets.dart';
-import 'package:ai_assistant_app/screens/singin_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 class AiOnboarding extends StatefulWidget {
@@ -13,8 +13,7 @@ class AiOnboarding extends StatefulWidget {
 class _AiOnboardingState extends State<AiOnboarding> {
   @override
   void initState() {
-    Future.delayed(const Duration(seconds: 5),() => context.go('/signin') 
-    );
+    Future.delayed(const Duration(seconds: 5),() => context.go('/signin'));
     super.initState();
   }
 
@@ -28,7 +27,7 @@ class _AiOnboardingState extends State<AiOnboarding> {
             colors: [Color(0xFFFF66C4), Color(0xFFFFde59)],
           ),
         ),
-        child: Center(child: Image.asset(AiAssets.novaIcon)),
+        child: Center(child: Image.asset(AiAssets.novaIcon, width: 250.sp,)),
       ),
     );
   }
