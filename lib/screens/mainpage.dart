@@ -12,16 +12,14 @@ class Mainpage extends StatefulWidget {
   @override
   State<Mainpage> createState() => _MainpageState();
 }
- String input = '';
+
+String input = '';
 final TextEditingController _inputcontroller = TextEditingController();
 
 class _MainpageState extends State<Mainpage> {
-  String input = _inputcontroller.text.trim();
-
-  message() async{
- input = _inputcontroller.text.trim() ;
-}
-
+  message() async {
+    input = _inputcontroller.text.trim();
+  }
 
   @override
   dispose() {
@@ -118,11 +116,14 @@ class _MainpageState extends State<Mainpage> {
               ),
               ShadButton(
                 onPressed: () {
-                   (input.isEmpty) ?
-                   null :
                   message();
-                  debugPrint(input);
-                  _inputcontroller.clear();
+                  if (input.isEmpty) {
+                    null;
+                    _inputcontroller.clear();
+                  } else {
+                    debugPrint(input);
+                    _inputcontroller.clear();
+                  }
                 },
                 icon: Icon(
                   LucideIcons.sendHorizontal,
