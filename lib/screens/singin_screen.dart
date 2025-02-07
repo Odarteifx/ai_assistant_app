@@ -22,36 +22,37 @@ final _formkey = GlobalKey<ShadFormState>();
 final TextEditingController _emailAddress = TextEditingController();
 final TextEditingController _password = TextEditingController();
 
-userLogin(BuildContext context) async {
-  email = _emailAddress.text.trim();
-  password = _password.text.trim();
-  try {
-    await FirebaseAuth.instance
-        .signInWithEmailAndPassword(email: email, password: password);
-    context.go('/mainpage');
-  } on FirebaseAuthException catch (e) {
-    if (e.code == 'user-not-found') {
-      ShadToaster.of(context).show(const ShadToast(
-        description: Text('No user found for that email.'),
-      ));
-    } else if (e.code == 'wrong-password') {
-      ShadToaster.of(context).show(const ShadToast(
-          description: Text('Incorrect password. Please try again')));
-    } else {
-      ShadToaster.of(context).show(ShadToast(
-        description: Text('${e.message}'),
-      ));
+class _SigninScreenState extends State<SigninScreen> {
+  userLogin() async {
+    email = _emailAddress.text.trim();
+    password = _password.text.trim();
+    try {
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+      context.go('/mainpage');
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        ShadToaster.of(context).show(const ShadToast(
+          description: Text('No user found for that email.'),
+        ));
+      } else if (e.code == 'wrong-password') {
+        ShadToaster.of(context).show(const ShadToast(
+            description: Text('Incorrect password. Please try again')));
+      } else {
+        ShadToaster.of(context).show(ShadToast(
+          description: Text('${e.message}'),
+        ));
+      }
     }
   }
-}
 
-@override
-void dispose() {
-  _emailAddress.dispose();
-  _password.dispose();
-}
+  @override
+  void dispose() {
+    _emailAddress.dispose();
+    _password.dispose();
+    super.dispose();
+  }
 
-class _SigninScreenState extends State<SigninScreen> {
   bool obscure = true;
   @override
   Widget build(BuildContext context) {
@@ -132,7 +133,7 @@ class _SigninScreenState extends State<SigninScreen> {
                               Expanded(
                                 child: ShadButton(
                                   onPressed: () {
-                                    userLogin(context);
+                                    userLogin();
                                   },
                                   height: 48.sp,
                                   backgroundColor: const Color(0xFFE344A6),

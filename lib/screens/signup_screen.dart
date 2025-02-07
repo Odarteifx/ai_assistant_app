@@ -25,80 +25,82 @@ final TextEditingController _password = TextEditingController();
 final TextEditingController _username = TextEditingController();
 final TextEditingController _confirmPassword = TextEditingController();
 
+class _SignupScreenState extends State<SignupScreen> {
+  registration() async {
+    if (_formkey.currentState!.validate()) {
+      name = _username.text.trim();
+      email = _emailAddress.text.trim();
+      password = _password.text.trim();
+      confirmpassword = _confirmPassword.text.trim();
+
+      if (password == confirmpassword &&
+          name.isNotEmpty &&
+          email.isNotEmpty &&
+          password.isNotEmpty) {
+        try {
+          final userCredential = await FirebaseAuth.instance
+              .createUserWithEmailAndPassword(email: email, password: password);
+          FirebaseAuth.instance.currentUser?.updateDisplayName(name);
+
+          await FirebaseFirestore.instance
+              .collection('User')
+              .doc(userCredential.user!.uid)
+              .set({
+            'name': name,
+            'email': email,
+            'id': userCredential.user!.uid,
+          });
+
+          context.go('/mainpage');
+          ShadToaster.of(context).show(const ShadToast(
+            description: Text('Account Successfully Created'),
+          ));
+
+          debugPrint('Account Created!');
+        } on FirebaseException catch (e) {
+          String errorMessage;
+          if (e.code == 'weak-password') {
+            errorMessage =
+                'Your password is too simple. Try adding more characters, numbers, or symbols.';
+          } else if (e.code == 'email-already-in-use') {
+            errorMessage =
+                'Account already exists. Try logging in or use a different email.';
+          } else {
+            errorMessage = e.message ?? 'An unknown error occurred.';
+          }
+          ShadToaster.of(context).show(ShadToast(
+            description: Text(errorMessage),
+          ));
+        } catch (e) {
+          // Handle any other errors
+          ShadToaster.of(context).show(ShadToast(
+            description: Text('Error: ${e.toString()}'),
+          ));
+        }
+      } else {
+        ShadToaster.of(context).show(const ShadToast(
+          description: Text('Passwords do not match'),
+        ));
+      }
+    } else {
+      ShadToaster.of(context).show(const ShadToast(
+        description: Text('Please fill in all fields'),
+      ));
+    }
+  }
+
 @override
 void dispose() {
   _emailAddress.dispose();
   _password.dispose();
   _username.dispose();
   _confirmPassword.dispose();
+   super.dispose();
 }
-
-registration(BuildContext context) async {
-  if (_formkey.currentState!.validate()) {
-    name = _username.text.trim();
-    email = _emailAddress.text.trim();
-    password = _password.text.trim();
-    confirmpassword = _confirmPassword.text.trim();
-
-    if (password == confirmpassword &&
-        name.isNotEmpty &&
-        email.isNotEmpty &&
-        password.isNotEmpty) {
-      try {
-        final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
-        FirebaseAuth.instance.currentUser?.updateDisplayName(name);
-
-        await FirebaseFirestore.instance
-            .collection('User')
-            .doc(userCredential.user!.uid)
-            .set({
-          'name': name,
-          'email': email,
-          'id': userCredential.user!.uid,
-        });
-
-        context.go('/mainpage');
-        ShadToaster.of(context).show(const ShadToast(
-          description: Text('Account Successfully Created'),
-        ));
-        
-        debugPrint('Account Created!');
-      } on FirebaseException catch (e) {
-        String errorMessage;
-        if (e.code == 'weak-password') {
-          errorMessage = 'Your password is too simple. Try adding more characters, numbers, or symbols.';
-        } else if (e.code == 'email-already-in-use') {
-          errorMessage = 'Account already exists. Try logging in or use a different email.';
-        } else {
-          errorMessage = e.message ?? 'An unknown error occurred.';
-        }
-        ShadToaster.of(context).show( ShadToast(
-          description: Text(errorMessage),
-        ));
-      } catch (e) {
-        // Handle any other errors
-        ShadToaster.of(context).show( ShadToast(
-          description: Text('Error: ${e.toString()}'),
-        ));
-      }
-    } else {
-       ShadToaster.of(context).show( const ShadToast(
-          description: Text('Passwords do not match'),
-        ));
-    }
-  } else {
-   ShadToaster.of(context).show( const ShadToast(
-          description: Text('Please fill in all fields'),
-        )); 
-  }
-}
-
-class _SignupScreenState extends State<SignupScreen> {
   bool obscure = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.h),
         child: Column(
@@ -228,7 +230,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               Expanded(
                                 child: ShadButton(
                                   onPressed: () {
-                                    registration(context);
+                                    registration();
                                   },
                                   height: 48.sp,
                                   backgroundColor: const Color(0xFFE344A6),
@@ -273,5 +275,3 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 }
-
-
