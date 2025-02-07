@@ -1,6 +1,7 @@
 import 'package:ai_assistant_app/constants/ai_assets.dart';
 import 'package:ai_assistant_app/constants/colors.dart';
 import 'package:ai_assistant_app/constants/typography.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -13,9 +14,34 @@ class SigninScreen extends StatefulWidget {
   State<SigninScreen> createState() => _SigninScreenState();
 }
 
+String email = '', password = '';
+
 final _formkey = GlobalKey<ShadFormState>();
 final TextEditingController _emailAddress = TextEditingController();
 final TextEditingController _password = TextEditingController();
+
+userLogin(BuildContext context) async {
+  email = _emailAddress.text.trim();
+  password = _password.text.trim();
+  try {
+    await FirebaseAuth.instance
+        .signInWithEmailAndPassword(email: email, password: password);
+    context.go('/mainpage');
+  } on FirebaseAuthException catch (e) {
+    if (e.code == 'user-not-found') {
+      ShadToaster.of(context).show(const ShadToast(
+        description: Text('No user found for that email.'),
+      ));
+    } else if (e.code == 'wrong-password') {
+      ShadToaster.of(context).show(const ShadToast(
+          description: Text('Incorrect password. Please try again')));
+    } else {
+      ShadToaster.of(context).show(ShadToast(
+        description: Text('${e.message}'),
+      ));
+    }
+  }
+}
 
 @override
 void dispose() {
@@ -103,7 +129,9 @@ class _SigninScreenState extends State<SigninScreen> {
                             children: [
                               Expanded(
                                 child: ShadButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    userLogin(context);
+                                  },
                                   height: 48.sp,
                                   backgroundColor: const Color(0xFFE344A6),
                                   pressedBackgroundColor:
