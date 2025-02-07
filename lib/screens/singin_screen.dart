@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:ai_assistant_app/constants/ai_assets.dart';
 import 'package:ai_assistant_app/constants/colors.dart';
 import 'package:ai_assistant_app/constants/typography.dart';
