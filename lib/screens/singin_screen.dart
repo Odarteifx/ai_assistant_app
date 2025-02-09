@@ -16,13 +16,13 @@ class SigninScreen extends StatefulWidget {
   State<SigninScreen> createState() => _SigninScreenState();
 }
 
-String email = '', password = '';
-
-final _formkey = GlobalKey<ShadFormState>();
-final TextEditingController _emailAddress = TextEditingController();
-final TextEditingController _password = TextEditingController();
-
 class _SigninScreenState extends State<SigninScreen> {
+  String email = '', password = '';
+
+  final _formkey = GlobalKey<ShadFormState>();
+  final TextEditingController _emailAddress = TextEditingController();
+  final TextEditingController _password = TextEditingController();
+
   userLogin() async {
     email = _emailAddress.text.trim();
     password = _password.text.trim();

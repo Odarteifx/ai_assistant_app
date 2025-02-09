@@ -19,13 +19,24 @@ class SignupScreen extends StatefulWidget {
 
 String name = '', email = '', password = '', confirmpassword = '';
 
-final _formkey = GlobalKey<ShadFormState>();
-final TextEditingController _emailAddress = TextEditingController();
-final TextEditingController _password = TextEditingController();
-final TextEditingController _username = TextEditingController();
-final TextEditingController _confirmPassword = TextEditingController();
-
 class _SignupScreenState extends State<SignupScreen> {
+  final _formkey = GlobalKey<ShadFormState>();
+  final TextEditingController _emailAddress = TextEditingController();
+  final TextEditingController _password = TextEditingController();
+  final TextEditingController _username = TextEditingController();
+  final TextEditingController _confirmPassword = TextEditingController();
+
+  bool obscure = true;
+
+  @override
+  void dispose() {
+    _emailAddress.dispose();
+    _password.dispose();
+    _username.dispose();
+    _confirmPassword.dispose();
+    super.dispose();
+  }
+
   registration() async {
     if (_formkey.currentState!.validate()) {
       name = _username.text.trim();
@@ -89,15 +100,6 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
-@override
-void dispose() {
-  _emailAddress.dispose();
-  _password.dispose();
-  _username.dispose();
-  _confirmPassword.dispose();
-   super.dispose();
-}
-  bool obscure = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
