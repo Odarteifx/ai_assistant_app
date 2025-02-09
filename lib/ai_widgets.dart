@@ -20,7 +20,9 @@ class ChatMenu extends StatelessWidget {
             ),
             Text(
               'Chat History',
-              style: TextStyle(fontSize: AppFontSize.onboadingbody, fontWeight: AppFontWeight.bold),
+              style: TextStyle(
+                  fontSize: AppFontSize.onboadingbody,
+                  fontWeight: AppFontWeight.bold),
             ),
 
             //Prompt History Section
@@ -53,10 +55,14 @@ class ChatMenu extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(FirebaseAuth.instance.currentUser!.displayName
-                          .toString()),
+                      Text(
+                        FirebaseAuth.instance.currentUser!.displayName
+                            .toString(),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       Text(
                         FirebaseAuth.instance.currentUser!.email.toString(),
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                             fontSize: AppFontSize.termsfont,
                             color: Colors.grey),
