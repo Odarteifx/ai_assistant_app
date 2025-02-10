@@ -6,17 +6,17 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../ai_widgets.dart';
 
-class Mainpage extends StatefulWidget {
-  const Mainpage({super.key});
+class Promptpage extends StatefulWidget {
+  const Promptpage({super.key});
 
   @override
-  State<Mainpage> createState() => _MainpageState();
+  State<Promptpage> createState() => _PromptpageState();
 }
 
 String input = '';
 final TextEditingController _inputcontroller = TextEditingController();
 
-class _MainpageState extends State<Mainpage> {
+class _PromptpageState extends State<Promptpage> {
   message() async {
     input = _inputcontroller.text.trim();
   }
@@ -97,7 +97,9 @@ class _MainpageState extends State<Mainpage> {
                   child: ShadInputFormField(
                     controller: _inputcontroller,
                     id: 'input',
-                    placeholder: const Text('Ask Nova'),
+                    minLines: 1,
+                    maxLines: null,
+                    placeholder: const Text('Ask Nova...'),
                     keyboardType: TextInputType.text,
                     inputPadding: EdgeInsets.symmetric(vertical: 3.sp),
                     prefix: GestureDetector(
