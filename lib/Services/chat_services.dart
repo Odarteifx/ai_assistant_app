@@ -20,6 +20,7 @@ class ChatServices {
     final messageId = _firebaseFirestore.collection('messages').doc().id;
 
     Message newMessage = Message(
+      senderId: _firebaseAuth.currentUser!.uid,
       message: message,
       messageId: messageId,
       timestamp: timestamp,
