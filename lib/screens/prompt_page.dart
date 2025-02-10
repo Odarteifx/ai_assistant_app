@@ -98,7 +98,7 @@ class _PromptpageState extends State<Promptpage> {
                     controller: _inputcontroller,
                     id: 'input',
                     minLines: 1,
-                    maxLines: null,
+                    maxLines: 8,
                     placeholder: const Text('Ask Nova...'),
                     keyboardType: TextInputType.text,
                     inputPadding: EdgeInsets.symmetric(vertical: 3.sp),
