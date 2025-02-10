@@ -1,3 +1,4 @@
+import 'package:ai_assistant_app/Services/chat_services.dart';
 import 'package:ai_assistant_app/constants/ai_assets.dart';
 import 'package:ai_assistant_app/constants/typography.dart';
 import 'package:flutter/material.dart';
@@ -13,13 +14,35 @@ class Promptpage extends StatefulWidget {
   State<Promptpage> createState() => _PromptpageState();
 }
 
-String input = '';
-final TextEditingController _inputcontroller = TextEditingController();
 
 class _PromptpageState extends State<Promptpage> {
-  message() async {
-    input = _inputcontroller.text.trim();
+
+  String input = '';
+final TextEditingController _inputcontroller = TextEditingController();
+final ChatServices _chatServices = ChatServices();
+String chatRoomId = '';
+
+@override
+void initState(){
+  super.initState();
+  _initializeChatRoom();
+}
+
+Future<void> _initializeChatRoom() async{
+  chatRoomId = await _chatServices.createChatRoom();
+}
+
+  void sendMessage() async{
+  input = _inputcontroller.text.trim();
+  if (input.isNotEmpty) {
+    await _chatServices.sendMessage(chatRoomId, input);
+    debugPrint(input);
+    _inputcontroller.clear();
+  } else {
+     null;
+     _inputcontroller.clear();
   }
+}
 
   @override
   dispose() {
@@ -118,14 +141,7 @@ class _PromptpageState extends State<Promptpage> {
               ),
               ShadButton(
                 onPressed: () {
-                  message();
-                  if (input.isEmpty) {
-                    null;
-                    _inputcontroller.clear();
-                  } else {
-                    debugPrint(input);
-                    _inputcontroller.clear();
-                  }
+                  sendMessage();
                 },
                 icon: Icon(
                   LucideIcons.sendHorizontal,
