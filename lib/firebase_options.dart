@@ -3,6 +3,7 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -49,16 +50,16 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCkPUo8u-smNwMEBE4UcEUYXEQR6YxyTEs',
+  static FirebaseOptions android = FirebaseOptions(
+    apiKey: '${dotenv.env['FIREBASEAPI_AND']}',
     appId: '1:120421034453:android:19c8ea316271fc559ab55c',
     messagingSenderId: '120421034453',
     projectId: 'nova-ai-app',
     storageBucket: 'nova-ai-app.firebasestorage.app',
   );
 
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyA_atNk6sVXaC6xKye3RyJ1YszhCB9amNA',
+  static FirebaseOptions ios = FirebaseOptions(
+    apiKey: '${dotenv.env['FIREBASEAPI_IOS']}',
     appId: '1:120421034453:ios:5f29e177dfa7f09d9ab55c',
     messagingSenderId: '120421034453',
     projectId: 'nova-ai-app',

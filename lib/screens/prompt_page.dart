@@ -131,8 +131,8 @@ class _PromptPageState extends State<PromptPage> {
                       String firstMessage =
                           snapshot.data!.docs.first['message'];
                       List<String> words = firstMessage.split(' ');
-                      String title = words.length > 3
-                          ? words.sublist(0, 3).join(' ') + '...'
+                      String title = words.length > 20
+                          ? '${words.sublist(0, 20).join(' ')}...'
                           : firstMessage;
                       return Text(
                         title,
