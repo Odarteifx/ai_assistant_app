@@ -20,7 +20,7 @@ class _PromptPageState extends State<PromptPage> {
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final ChatServices _chatServices = ChatServices();
-  String chatRoomId = '';
+  String chatRoomId = 'Id';
   bool chatRoomCreated = false;
 
   @override
@@ -32,7 +32,6 @@ class _PromptPageState extends State<PromptPage> {
   Future<void> _checkIfChatRoomExists() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      // Check if a chat room exists for the user
       final querySnapshot = await FirebaseFirestore.instance
           .collection('chat_rooms')
           .where('created_by', isEqualTo: user.uid)
@@ -76,6 +75,7 @@ class _PromptPageState extends State<PromptPage> {
       }
       await _chatServices.sendMessage(chatRoomId, input);
       debugPrint(input);
+      debugPrint('Message is written in $chatRoomId');
       _inputController.clear();
       _scrollToBottom();
     } else {
@@ -146,7 +146,9 @@ class _PromptPageState extends State<PromptPage> {
                     LucideIcons.messageSquarePlus,
                     size: 20.sp,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    _initializeChatRoom();
+                  },
                 ),
               ],
             ),
