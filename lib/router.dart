@@ -19,6 +19,6 @@ final GoRouter router = GoRouter(routes: [
   ),
   GoRoute(
     path: '/mainpage',
-    builder: (context, state) => const Promptpage(),
+    builder: (context, state) => const PromptPage(),
   )
 ]);
