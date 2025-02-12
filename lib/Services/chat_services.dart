@@ -15,12 +15,12 @@ class ChatServices {
     return chatRoomId;
   }
 
-  Future<void> sendMessage(String chatRoomId, String message) async {
+  Future<void> sendMessage( String uid, String chatRoomId, String message) async {
     final timestamp = Timestamp.now();
     final messageId = _firebaseFirestore.collection('messages').doc().id;
 
     Message newMessage = Message(
-      senderId: _firebaseAuth.currentUser!.uid,
+      senderId: uid,
       message: message,
       messageId: messageId,
       timestamp: timestamp,
