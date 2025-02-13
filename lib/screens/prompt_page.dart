@@ -27,8 +27,8 @@ class _PromptPageState extends State<PromptPage> {
   String chatRoomId = 'Id';
   bool chatRoomCreated = false;
 
-  final String apiKey = 'sk-ad617558fe9948eb83cc2c85a14375b5';
-  final String apiUrl = 'https://api.deepseek.com/v1/completions';
+  final String apiKey = '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';
+  final String apiUrl = 'https://openrouter.ai/api/v1/chat/completions';
 
   String responseText = '';
 
@@ -79,12 +79,12 @@ class _PromptPageState extends State<PromptPage> {
   void sendMessage() async {
     input = _inputController.text.trim();
     final user = FirebaseAuth.instance.currentUser;
-    const deepSeekId = 'QWERTYTIGPVDGKH';
+    const deepSeekId = 'DeepSeekId';
     if (input.isNotEmpty) {
       if (!chatRoomCreated) {
         await _initializeChatRoom();
       }
-      await _chatServices.sendMessage(user!.uid,chatRoomId, input);
+      await _chatServices.sendMessage(user!.uid, chatRoomId, input);
 
       try {
         final response = await http.post(Uri.parse(apiUrl),
@@ -93,20 +93,23 @@ class _PromptPageState extends State<PromptPage> {
               'Content-Type': 'application/json'
             },
             body: jsonEncode({
-              'model': 'gpt-3.5-turbo',
+              'model': 'deepseek/deepseek-chat:free',
               'messages': [
                 {"role": "user", "content": input}
-              ]
+              ],
             }));
         if (response.statusCode == 200) {
           final responseData = jsonDecode(response.body);
-          final deepSeekResponse = responseData['choices'][0]['message']['content'];
-
-          await _chatServices.sendMessage(deepSeekId,chatRoomId, deepSeekResponse);
-        } else {
+          final deepSeekResponse =
+              responseData['choices'][0]['message']['content'];
           await _chatServices.sendMessage(
-              deepSeekId,chatRoomId, 'Error: Unable to fetch response from DeepSeek.');
+              deepSeekId, chatRoomId, deepSeekResponse);
+              debugPrint(responseData);
+        } else {
+          await _chatServices.sendMessage(deepSeekId, chatRoomId,
+              'Error: Unable to fetch response from DeepSeek.');
           debugPrint('Error: ${response.statusCode} - ${response.body}');
+          
         }
       } catch (e) {
         debugPrint('Exception: $e');
@@ -115,7 +118,7 @@ class _PromptPageState extends State<PromptPage> {
       debugPrint(input);
       debugPrint(responseText);
       debugPrint('Message is written in $chatRoomId');
-      
+
       _inputController.clear();
       _scrollToBottom();
     } else {
