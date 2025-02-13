@@ -15,7 +15,7 @@ class ChatServices {
     return chatRoomId;
   }
 
-  Future<void> sendMessage( String uid, String chatRoomId, String message) async {
+  Future<void> sendMessage( String uid, String chatRoomId, dynamic message) async {
     final timestamp = Timestamp.now();
     final messageId = _firebaseFirestore.collection('messages').doc().id;
 

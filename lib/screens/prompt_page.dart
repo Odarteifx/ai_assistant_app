@@ -20,17 +20,17 @@ class PromptPage extends StatefulWidget {
 }
 
 class _PromptPageState extends State<PromptPage> {
-  String input = '';
+  dynamic input = '';
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final ChatServices _chatServices = ChatServices();
   String chatRoomId = 'Id';
   bool chatRoomCreated = false;
 
-  final String apiKey = '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';
+  final String apiKey = '${dotenv.env['DEEPSEEK_KEY']}';
   final String apiUrl = 'https://openrouter.ai/api/v1/chat/completions';
 
-  String responseText = '';
+  dynamic responseText = '';
 
   @override
   void initState() {
