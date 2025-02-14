@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:ai_assistant_app/constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,6 +8,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_emoji/flutter_emoji.dart';
 import '../ai_widgets.dart';
 import '../constants/ai_assets.dart';
 import '../constants/typography.dart';
@@ -26,11 +28,10 @@ class _PromptPageState extends State<PromptPage> {
   final ChatServices _chatServices = ChatServices();
   String chatRoomId = 'Id';
   bool chatRoomCreated = false;
+  bool _isLoading = false;
 
   final String apiKey = '${dotenv.env['DEEPSEEK_KEY']}';
   final String apiUrl = 'https://openrouter.ai/api/v1/chat/completions';
-
-  dynamic responseText = '';
 
   @override
   void initState() {
@@ -81,6 +82,10 @@ class _PromptPageState extends State<PromptPage> {
     final user = FirebaseAuth.instance.currentUser;
     const deepSeekId = 'DeepSeekId';
     if (input.isNotEmpty) {
+      setState(() {
+        _isLoading = true;
+      });
+      _inputController.clear();
       if (!chatRoomCreated) {
         await _initializeChatRoom();
       }
@@ -90,7 +95,7 @@ class _PromptPageState extends State<PromptPage> {
         final response = await http.post(Uri.parse(apiUrl),
             headers: {
               'Authorization': 'Bearer $apiKey',
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json; charset=utf-8'
             },
             body: jsonEncode({
               'model': 'deepseek/deepseek-chat:free',
@@ -104,26 +109,26 @@ class _PromptPageState extends State<PromptPage> {
               responseData['choices'][0]['message']['content'];
           await _chatServices.sendMessage(
               deepSeekId, chatRoomId, deepSeekResponse);
-              debugPrint(responseData);
+          debugPrint(responseData);
+          debugPrint(deepSeekResponse);
         } else {
           await _chatServices.sendMessage(deepSeekId, chatRoomId,
               'Error: Unable to fetch response from DeepSeek.');
           debugPrint('Error: ${response.statusCode} - ${response.body}');
-          
         }
       } catch (e) {
         debugPrint('Exception: $e');
       }
 
       debugPrint(input);
-      debugPrint(responseText);
-      debugPrint('Message is written in $chatRoomId');
-
-      _inputController.clear();
       _scrollToBottom();
+      debugPrint('Message is written in $chatRoomId');
     } else {
       _inputController.clear();
     }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   void _scrollToBottom() {
@@ -263,11 +268,11 @@ class _PromptPageState extends State<PromptPage> {
                   onPressed: () {
                     sendMessage();
                   },
-                  icon: Icon(
-                    LucideIcons.sendHorizontal,
+                  icon: Icon( _isLoading?
+                    LucideIcons.circleStop: LucideIcons.sendHorizontal,
                     size: 20.sp,
                   ),
-                  backgroundColor: const Color(0xFFE344A6),
+                  backgroundColor: _isLoading? const Color(0xB6877B82) : const Color(0xFFE344A6),
                   pressedBackgroundColor: const Color(0xFFCA4E9A),
                 )
               ],
@@ -290,17 +295,19 @@ class _PromptPageState extends State<PromptPage> {
           return const Center(child: CircularProgressIndicator());
         }
 
+        var docs = snapshot.data!.docs;
         return ListView(
           controller: _scrollController,
           children: snapshot.data!.docs.map((document) {
-            return buildMessageItem(document);
+            bool isLastMessage = docs.last == document;
+            return buildMessageItem(document, isLastMessage);
           }).toList(),
         );
       },
     );
   }
 
-  Widget buildMessageItem(DocumentSnapshot document) {
+  Widget buildMessageItem(DocumentSnapshot document, bool isLastMessage) {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
 
     var isUser = data['senderId'] == FirebaseAuth.instance.currentUser!.uid;
@@ -311,17 +318,78 @@ class _PromptPageState extends State<PromptPage> {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       child: Container(
         alignment: alignment,
-        child: Container(
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(15.sp),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(data['message']),
-          ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment:
+              isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+          children: [
+            !isUser
+                ? ShadAvatar(AiAssets.novaIcon2,
+                    size: Size(32.sp, 32.sp),
+                    backgroundColor: AppColor.backgroundColor,
+                    shape: CircleBorder(side: BorderSide(color: color)))
+                : const Text(''),
+            !isUser
+                ? SizedBox(
+                    width: 5.sp,
+                  )
+                : const SizedBox(),
+            Flexible(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(15.sp),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: (!isUser && data['message'].isEmpty && _isLoading)
+                      ? const Text('Nova is thinking...')
+                      : SelectableText.rich(
+                          TextSpan(
+                              children: _parseMessage(data['message']),
+                              style: TextStyle(fontSize: AppFontSize.termsfont)),
+                        ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  List<TextSpan> _parseMessage(String message) {
+    final List<TextSpan> spans = [];
+    final RegExp exp = RegExp(r'(\*\*.*?\*\*|:[a-z_]+:|[^*]+)',
+        unicode: true); // Added unicode flag
+    final Iterable<Match> matches = exp.allMatches(message);
+
+    for (final Match match in matches) {
+      final String text = match.group(0)!;
+      if (text.startsWith('**') && text.endsWith('**')) {
+        spans.add(TextSpan(
+          text: text.substring(2, text.length - 2),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ));
+      } else if (text.startsWith(':') && text.endsWith(':')) {
+        spans.add(TextSpan(
+          text: _getEmoji(text),
+        ));
+      } else {
+        spans.add(TextSpan(text: text));
+      }
+    }
+
+    return spans;
+  }
+
+  String _getEmoji(String name) {
+    var parser = EmojiParser();
+    const Map<String, String> emojiMap = {
+      ':smile:': '😊',
+      ':heart:': '❤️',
+    };
+
+    return emojiMap[name] ?? name;
   }
 }
