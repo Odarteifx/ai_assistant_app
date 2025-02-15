@@ -4,4 +4,6 @@ class AiAssets {
 
   static const String appleIcon = 'assets/applelog.png';
   static const String googleIcon = 'assets/google.png';
+
+  static const String noProfilepic = 'assets/profilepic.png';
 }

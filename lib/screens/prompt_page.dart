@@ -21,22 +21,33 @@ class PromptPage extends StatefulWidget {
   State<PromptPage> createState() => _PromptPageState();
 }
 
-class _PromptPageState extends State<PromptPage> {
+class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
   dynamic input = '';
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final ChatServices _chatServices = ChatServices();
   String chatRoomId = 'Id';
+  String? _deepSeekResponse;
   bool chatRoomCreated = false;
   bool _isLoading = false;
 
   final String apiKey = '${dotenv.env['DEEPSEEK_KEY']}';
   final String apiUrl = 'https://openrouter.ai/api/v1/chat/completions';
 
+  late AnimationController _animationController;
+  late Animation<int> _dotsAnimation;
+
   @override
   void initState() {
     super.initState();
     _checkIfChatRoomExists();
+
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: this,
+    )..repeat();
+    
+    _dotsAnimation = IntTween(begin: 0, end: 3).animate(_animationController);
   }
 
   Future<void> _checkIfChatRoomExists() async {
@@ -65,7 +76,6 @@ class _PromptPageState extends State<PromptPage> {
         chatRoomCreated = true;
       });
     } catch (e) {
-      // Handle error creating chat room
       debugPrint('Error creating chat room: $e');
     }
   }
@@ -84,12 +94,16 @@ class _PromptPageState extends State<PromptPage> {
     if (input.isNotEmpty) {
       setState(() {
         _isLoading = true;
+        _deepSeekResponse = null;
       });
       _inputController.clear();
+
       if (!chatRoomCreated) {
         await _initializeChatRoom();
       }
+
       await _chatServices.sendMessage(user!.uid, chatRoomId, input);
+      _scrollToBottom();
 
       try {
         final response = await http.post(Uri.parse(apiUrl),
@@ -105,30 +119,33 @@ class _PromptPageState extends State<PromptPage> {
             }));
         if (response.statusCode == 200) {
           final responseData = jsonDecode(response.body);
-          final deepSeekResponse =
-              responseData['choices'][0]['message']['content'];
+          _deepSeekResponse = responseData['choices'][0]['message']['content'];
+
           await _chatServices.sendMessage(
-              deepSeekId, chatRoomId, deepSeekResponse);
-          debugPrint(responseData);
-          debugPrint(deepSeekResponse);
+              deepSeekId, chatRoomId, _deepSeekResponse!);
+          _scrollToBottom();
         } else {
-          await _chatServices.sendMessage(deepSeekId, chatRoomId,
-              'Error: Unable to fetch response from DeepSeek.');
+          _deepSeekResponse == 'Error: Unable to fetch response from DeepSeek.';
+          await _chatServices.sendMessage(
+              deepSeekId, chatRoomId, _deepSeekResponse);
           debugPrint('Error: ${response.statusCode} - ${response.body}');
+          _scrollToBottom();
         }
       } catch (e) {
+        _deepSeekResponse == 'Error: An exception occurred.';
         debugPrint('Exception: $e');
+        await _chatServices.sendMessage(
+            deepSeekId, chatRoomId, _deepSeekResponse!);
+        _scrollToBottom();
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+        _scrollToBottom();
       }
-
-      debugPrint(input);
-      _scrollToBottom();
-      debugPrint('Message is written in $chatRoomId');
     } else {
       _inputController.clear();
     }
-    setState(() {
-      _isLoading = false;
-    });
   }
 
   void _scrollToBottom() {
@@ -143,6 +160,7 @@ class _PromptPageState extends State<PromptPage> {
   void dispose() {
     _inputController.dispose();
     _scrollController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -179,8 +197,8 @@ class _PromptPageState extends State<PromptPage> {
                       String firstMessage =
                           snapshot.data!.docs.first['message'];
                       List<String> words = firstMessage.split(' ');
-                      String title = words.length > 20
-                          ? '${words.sublist(0, 20).join(' ')}...'
+                      String title = words.length > 19
+                          ? '${words.sublist(0, 19).join(' ')}...'
                           : firstMessage;
                       return Text(
                         title,
@@ -247,7 +265,15 @@ class _PromptPageState extends State<PromptPage> {
                       controller: _inputController,
                       minLines: 1,
                       maxLines: 8,
-                      placeholder: const Text('Ask Nova...'),
+                      placeholder: _isLoading
+                          ? AnimatedBuilder(
+                              animation: _dotsAnimation,
+                              builder: (context, child) {
+                                String dots = '.' * _dotsAnimation.value;
+                                return Text('Nova is thinking$dots');
+                              },
+                            )
+                          : const Text('Ask Nova...'),
                       keyboardType: TextInputType.text,
                       inputPadding: EdgeInsets.symmetric(vertical: 3.sp),
                       prefix: GestureDetector(
@@ -268,11 +294,15 @@ class _PromptPageState extends State<PromptPage> {
                   onPressed: () {
                     sendMessage();
                   },
-                  icon: Icon( _isLoading?
-                    LucideIcons.circleStop: LucideIcons.sendHorizontal,
+                  icon: Icon(
+                    _isLoading
+                        ? LucideIcons.circleStop
+                        : LucideIcons.sendHorizontal,
                     size: 20.sp,
                   ),
-                  backgroundColor: _isLoading? const Color(0xB6877B82) : const Color(0xFFE344A6),
+                  backgroundColor: _isLoading
+                      ? const Color(0xB6877B82)
+                      : const Color(0xFFE344A6),
                   pressedBackgroundColor: const Color(0xFFCA4E9A),
                 )
               ],
@@ -294,25 +324,23 @@ class _PromptPageState extends State<PromptPage> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
-
-        var docs = snapshot.data!.docs;
         return ListView(
           controller: _scrollController,
           children: snapshot.data!.docs.map((document) {
-            bool isLastMessage = docs.last == document;
-            return buildMessageItem(document, isLastMessage);
+            return buildMessageItem(document);
           }).toList(),
         );
       },
     );
   }
 
-  Widget buildMessageItem(DocumentSnapshot document, bool isLastMessage) {
+  Widget buildMessageItem(DocumentSnapshot document) {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
 
     var isUser = data['senderId'] == FirebaseAuth.instance.currentUser!.uid;
     var alignment = isUser ? Alignment.bottomRight : Alignment.bottomLeft;
-    var color = isUser ? const Color(0xFFFDE8F4) : const Color(0xfff5f5f5);
+    var color = isUser ? const Color(0xFFFDE8F4) : AppColor.backgroundColor;
+    String message = data['message'];
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -327,7 +355,8 @@ class _PromptPageState extends State<PromptPage> {
                 ? ShadAvatar(AiAssets.novaIcon2,
                     size: Size(32.sp, 32.sp),
                     backgroundColor: AppColor.backgroundColor,
-                    shape: CircleBorder(side: BorderSide(color: color)))
+                    shape: const CircleBorder(
+                        side: BorderSide(color: Color(0xfff5f5f5))))
                 : const Text(''),
             !isUser
                 ? SizedBox(
@@ -342,13 +371,11 @@ class _PromptPageState extends State<PromptPage> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: (!isUser && data['message'].isEmpty && _isLoading)
-                      ? const Text('Nova is thinking...')
-                      : SelectableText.rich(
-                          TextSpan(
-                              children: _parseMessage(data['message']),
-                              style: TextStyle(fontSize: AppFontSize.termsfont)),
-                        ),
+                  child: SelectableText.rich(
+                    TextSpan(
+                      children: _parseMessage(message),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -360,8 +387,8 @@ class _PromptPageState extends State<PromptPage> {
 
   List<TextSpan> _parseMessage(String message) {
     final List<TextSpan> spans = [];
-    final RegExp exp = RegExp(r'(\*\*.*?\*\*|:[a-z_]+:|[^*]+)',
-        unicode: true); // Added unicode flag
+    final RegExp exp =
+        RegExp(r'(\*\*.*?\*\*|:[a-z_]+:|###.*|[^*]+)', unicode: true);
     final Iterable<Match> matches = exp.allMatches(message);
 
     for (final Match match in matches) {
@@ -371,9 +398,10 @@ class _PromptPageState extends State<PromptPage> {
           text: text.substring(2, text.length - 2),
           style: const TextStyle(fontWeight: FontWeight.bold),
         ));
-      } else if (text.startsWith(':') && text.endsWith(':')) {
+      } else if (text.startsWith('###')) {
         spans.add(TextSpan(
-          text: _getEmoji(text),
+          text: text.substring(3),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ));
       } else {
         spans.add(TextSpan(text: text));
@@ -381,15 +409,5 @@ class _PromptPageState extends State<PromptPage> {
     }
 
     return spans;
-  }
-
-  String _getEmoji(String name) {
-    var parser = EmojiParser();
-    const Map<String, String> emojiMap = {
-      ':smile:': '😊',
-      ':heart:': '❤️',
-    };
-
-    return emojiMap[name] ?? name;
   }
 }
