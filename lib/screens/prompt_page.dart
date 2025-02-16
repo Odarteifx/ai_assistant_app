@@ -46,7 +46,7 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
       duration: const Duration(seconds: 1),
       vsync: this,
     )..repeat();
-    
+
     _dotsAnimation = IntTween(begin: 0, end: 3).animate(_animationController);
   }
 
