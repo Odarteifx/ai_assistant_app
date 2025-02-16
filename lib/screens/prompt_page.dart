@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:ai_assistant_app/constants/colors.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +9,6 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_emoji/flutter_emoji.dart';
 import '../ai_widgets.dart';
 import '../constants/ai_assets.dart';
 import '../constants/typography.dart';
@@ -118,7 +118,7 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
               ],
             }));
         if (response.statusCode == 200) {
-          final responseData = jsonDecode(response.body);
+          final responseData = jsonDecode(utf8.decode(response.bodyBytes));
           _deepSeekResponse = responseData['choices'][0]['message']['content'];
 
           await _chatServices.sendMessage(
@@ -196,13 +196,12 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
                     } else {
                       String firstMessage =
                           snapshot.data!.docs.first['message'];
-                      List<String> words = firstMessage.split(' ');
-                      String title = words.length > 19
-                          ? '${words.sublist(0, 19).join(' ')}...'
-                          : firstMessage;
+                           const int maxLength = 30;
+                      String title = firstMessage.length > maxLength ? '${firstMessage.substring(0, maxLength)}...' : firstMessage;
                       return Text(
                         title,
-                        style: TextStyle(fontSize: 16.sp),
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 15.sp),
                       );
                     }
                   },
@@ -372,9 +371,10 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: SelectableText.rich(
-                    TextSpan(
+                  TextSpan(
                       children: _parseMessage(message),
                     ),
+                   style: TextStyle(fontSize: AppFontSize.subtext),
                   ),
                 ),
               ),
@@ -385,7 +385,7 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
     );
   }
 
-  List<TextSpan> _parseMessage(String message) {
+    List<TextSpan> _parseMessage(String message) {
     final List<TextSpan> spans = [];
     final RegExp exp =
         RegExp(r'(\*\*.*?\*\*|:[a-z_]+:|###.*|[^*]+)', unicode: true);
@@ -397,11 +397,6 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
         spans.add(TextSpan(
           text: text.substring(2, text.length - 2),
           style: const TextStyle(fontWeight: FontWeight.bold),
-        ));
-      } else if (text.startsWith('###')) {
-        spans.add(TextSpan(
-          text: text.substring(3),
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ));
       } else {
         spans.add(TextSpan(text: text));

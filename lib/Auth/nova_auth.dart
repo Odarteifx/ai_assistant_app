@@ -6,4 +6,3 @@ class NovaAuthMethods {
     return auth.currentUser;
   }
 }
-

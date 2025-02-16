@@ -68,9 +68,9 @@ class ChatMenu extends StatelessWidget {
                         return StreamBuilder(
                           stream: ChatServices().getMessages(chatRoomId),
                           builder: (context, messageSnapshot) {
-                            if (messageSnapshot.connectionState == ConnectionState.waiting) {
-                              return const Center(child: CircularProgressIndicator());
-                            }
+                            // if (messageSnapshot.connectionState == ConnectionState.waiting) {
+                            //   return const Center(child: CircularProgressIndicator());
+                            // }
         
                             if (!messageSnapshot.hasData || messageSnapshot.data!.docs.isEmpty) {
                               firstMessageText = 'No messages yet';
@@ -79,10 +79,11 @@ class ChatMenu extends StatelessWidget {
                             }
         
                             return ListTile(
+                              dense: true,
                               title: Text(
                                 firstMessageText,
                                 overflow: TextOverflow.ellipsis,
-                                // style: TextStyle(fontWeight: ),
+                                style: TextStyle(fontSize: AppFontSize.subtext),
                               ),
                               onTap: () {
                                 debugPrint('Tapped chat room with ID: $chatRoomId');
@@ -117,7 +118,7 @@ class ChatMenu extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        user.email.toString(),
+                        user.email.toString().toLowerCase(),
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                             fontSize: AppFontSize.termsfont,
