@@ -29,7 +29,7 @@ class _SigninScreenState extends State<SigninScreen> {
     try {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
-      context.go('/mainpage');
+      context.go('/prompt/${'Id'}');
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         ShadToaster.of(context).show(const ShadToast(

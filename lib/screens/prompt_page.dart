@@ -14,7 +14,11 @@ import '../constants/typography.dart';
 import '../services/chat_services.dart';
 
 class PromptPage extends StatefulWidget {
-  const PromptPage({super.key});
+  final String chatRoomId;
+  const PromptPage({
+    super.key,
+    required this.chatRoomId,
+  });
 
   @override
   State<PromptPage> createState() => _PromptPageState();
@@ -25,11 +29,11 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final ChatServices _chatServices = ChatServices();
-  String chatRoomId = 'Id';
+
   String? _deepSeekResponse;
   bool chatRoomCreated = false;
   bool _isLoading = false;
-
+  late String chatRoomId;
   final String apiKey = '${dotenv.env['DEEPSEEK_KEY']}';
   final String apiUrl = 'https://openrouter.ai/api/v1/chat/completions';
 
@@ -39,8 +43,8 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    chatRoomId = widget.chatRoomId;
     _checkIfChatRoomExists();
-
     _animationController = AnimationController(
       duration: const Duration(seconds: 1),
       vsync: this,
@@ -62,16 +66,18 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
           chatRoomId = querySnapshot.docs.first.id;
           chatRoomCreated = true;
         });
-      } else {
-        await _createChatRoomForUser();
+      }
+       else {
+        chatRoomCreated = false;
       }
     }
   }
 
   Future<void> _createChatRoomForUser() async {
     try {
-      chatRoomId = await _chatServices.createChatRoom();
+      String newchatRoomId = await _chatServices.createChatRoom();
       setState(() {
+        chatRoomId = newchatRoomId;
         chatRoomCreated = true;
       });
     } catch (e) {
@@ -80,9 +86,10 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
   }
 
   Future<void> _initializeChatRoom() async {
-    chatRoomId = await _chatServices.createChatRoom();
+    String newchatRoomId = await _chatServices.createChatRoom();
     setState(() {
       chatRoomCreated = true;
+      chatRoomId = newchatRoomId;
     });
   }
 
@@ -98,7 +105,7 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
       _inputController.clear();
 
       if (!chatRoomCreated) {
-        await _initializeChatRoom();
+        await _createChatRoomForUser();
       }
 
       await _chatServices.sendMessage(user!.uid, chatRoomId, input);
@@ -124,14 +131,14 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
               deepSeekId, chatRoomId, _deepSeekResponse!);
           _scrollToBottom();
         } else {
-          _deepSeekResponse == 'Error: Unable to fetch response from DeepSeek.';
+          _deepSeekResponse = 'Error: Unable to fetch response from DeepSeek.';
           await _chatServices.sendMessage(
               deepSeekId, chatRoomId, _deepSeekResponse);
           debugPrint('Error: ${response.statusCode} - ${response.body}');
           _scrollToBottom();
         }
       } catch (e) {
-        _deepSeekResponse == 'Error: An exception occurred.';
+        _deepSeekResponse = 'Error: An exception occurred.';
         debugPrint('Exception: $e');
         await _chatServices.sendMessage(
             deepSeekId, chatRoomId, _deepSeekResponse!);
@@ -195,8 +202,10 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
                     } else {
                       String firstMessage =
                           snapshot.data!.docs.first['message'];
-                           const int maxLength = 30;
-                      String title = firstMessage.length > maxLength ? '${firstMessage.substring(0, maxLength)}...' : firstMessage;
+                      const int maxLength = 30;
+                      String title = firstMessage.length > maxLength
+                          ? '${firstMessage.substring(0, maxLength)}...'
+                          : firstMessage;
                       return Text(
                         title,
                         overflow: TextOverflow.ellipsis,
@@ -298,9 +307,8 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
                         : LucideIcons.sendHorizontal,
                     size: 20.sp,
                   ),
-                  backgroundColor: _isLoading
-                      ? const Color(0xB6877B82)
-                      : const Color(0xFFE344A6),
+                  backgroundColor:
+                      _isLoading ? Colors.black : const Color(0xFFE344A6),
                   pressedBackgroundColor: const Color(0xFFCA4E9A),
                 )
               ],
@@ -370,10 +378,10 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: SelectableText.rich(
-                  TextSpan(
+                    TextSpan(
                       children: _parseMessage(message),
                     ),
-                   style: TextStyle(fontSize: AppFontSize.subtext),
+                    style: TextStyle(fontSize: AppFontSize.subtext),
                   ),
                 ),
               ),
@@ -384,7 +392,7 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
     );
   }
 
-    List<TextSpan> _parseMessage(String message) {
+  List<TextSpan> _parseMessage(String message) {
     final List<TextSpan> spans = [];
     final RegExp exp =
         RegExp(r'(\*\*.*?\*\*|:[a-z_]+:|###.*|[^*]+)', unicode: true);
