@@ -2,6 +2,7 @@ import 'package:ai_assistant_app/Services/chat_services.dart';
 import 'package:ai_assistant_app/constants/ai_assets.dart';
 import 'package:ai_assistant_app/constants/colors.dart';
 import 'package:ai_assistant_app/constants/typography.dart';
+import 'package:ai_assistant_app/screens/prompt_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -67,15 +68,17 @@ class ChatMenu extends StatelessWidget {
                       itemCount: chatRooms.length,
                       itemBuilder: (context, index) {
                         var chatRoom = chatRooms[index];
-                        String newchatRoomId = chatRoom.id;
+                        String chatRoomId = chatRoom.id;
                         String firstMessageText = 'No messages yet';
 
                         return StreamBuilder(
-                          stream: ChatServices().getMessages(newchatRoomId),
+                          stream: ChatServices().getMessages(chatRoomId),
                           builder: (context, messageSnapshot) {
-                            // if (messageSnapshot.connectionState == ConnectionState.waiting) {
-                            //   return const Center(child: CircularProgressIndicator());
-                            // }
+                            if (messageSnapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
 
                             if (!messageSnapshot.hasData ||
                                 messageSnapshot.data!.docs.isEmpty) {
@@ -93,7 +96,7 @@ class ChatMenu extends StatelessWidget {
                                 style: TextStyle(fontSize: AppFontSize.subtext),
                               ),
                               onTap: () {
-                                context.go('/prompt/$newchatRoomId');
+                                context.go('/prompt/$chatRoomId');
                               },
                             );
                           },
@@ -127,14 +130,28 @@ class ChatMenu extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
-                           SizedBox(height: 10.sp,),
+                          ShadAvatar(
+                              hasPhoto ? user.photoURL : AiAssets.noProfilepic,
+                              size: Size(70.sp, 70.sp),
+                              fit: BoxFit.cover),
+                          SizedBox(
+                            height: 10.sp,
+                          ),
+                          Text(
+                            user.displayName.toString(),
+                            style: TextStyle(
+                                fontSize: AppFontSize.onboadingbody,
+                                color: Colors.black),
+                          ),
+                          SizedBox(
+                            height: 10.sp,
+                          ),
                           Container(
                             decoration: BoxDecoration(
-                                border: Border.all(
-                                    color: const Color(0xFFDAD8D8)),
-                                borderRadius: BorderRadius.circular(10.sp)),
+                                border: Border.all(color: AppColor.iconColor),
+                                borderRadius: BorderRadius.circular(8.sp)),
                             child: Padding(
-                              padding: EdgeInsets.all(8.sp),
+                              padding: EdgeInsets.all(10.sp),
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -145,16 +162,66 @@ class ChatMenu extends StatelessWidget {
                               ),
                             ),
                           ),
-                          SizedBox(height: 10.sp,),
+                          SizedBox(
+                            height: 10.sp,
+                          ),
                           const ProfileTile(
-                              icon: Iconsax.document,
-                              iconText: 'Terms of Use'),
-                              const ProfileTile(
-                              icon: LucideIcons.hand,
-                              iconText: 'Privacy Policy'),
-                              const ProfileTile(
+                              icon: Iconsax.message_question,
+                              iconText: 'Help Center'),
+                          const ProfileTile(
+                              icon: Iconsax.document, iconText: 'Terms of Use'),
+                          const ProfileTile(
+                              icon: Iconsax.lock, iconText: 'Privacy Policy'),
+                          const ProfileTile(
                               icon: Iconsax.info_circle,
-                              iconText: 'Check for updates')
+                              iconText: 'Check for updates'),
+                          SizedBox(
+                            height: 5.sp,
+                          ),
+                          ProfileTile(
+                            icon: Iconsax.logout,
+                            iconText: 'Logout',
+                            onpressed: () {
+                              showShadDialog(
+                                context: context,
+                                builder: (context) {
+                                  return ShadDialog.alert(
+                                    title: const Text('Logout'),
+                                    description: const Text(
+                                        'Are you sure you want to logout?'),
+                                    actions: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          ShadButton.outline(
+                                            width: 100.sp,
+                                            child: const Text('No'),
+                                            onPressed: () =>
+                                                Navigator.pop(context),
+                                          ),
+                                          ShadButton(
+                                            width: 100.sp,
+                                            backgroundColor:
+                                                const Color(0xFFE91E63),
+                                            pressedBackgroundColor:
+                                                const Color.fromARGB(
+                                                    255, 203, 79, 121),
+                                            onPressed: () {
+                                              FirebaseAuth.instance.signOut();
+                                              Navigator.of(context).pop();
+                                              context.go('/signin');
+                                            },
+                                            child: const Text('Yes'),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                          )
                         ],
                       ),
                     );
@@ -164,26 +231,13 @@ class ChatMenu extends StatelessWidget {
               child: SizedBox(
                 width: 250.sp,
                 child: Row(
-                  spacing: 8.sp,
+                  spacing: 10.sp,
                   children: [
                     ShadAvatar(hasPhoto ? user.photoURL : AiAssets.noProfilepic,
                         size: Size(40.sp, 40.sp), fit: BoxFit.cover),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user.displayName.toString(),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          user.email.toString().toLowerCase(),
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              fontSize: AppFontSize.termsfont,
-                              color: Colors.grey),
-                        )
-                      ],
+                    Text(
+                      user.displayName.toString(),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -230,12 +284,12 @@ class ProfileTile extends StatelessWidget {
     return GestureDetector(
       onTap: onpressed,
       child: Padding(
-        padding: EdgeInsets.all(8.sp),
+        padding: EdgeInsets.symmetric(vertical: 8.sp),
         child: Row(
           children: [
             Icon(
               icon,
-               color: Colors.grey
+              color: Colors.grey,
             ),
             SizedBox(
               width: 10.w,
@@ -247,9 +301,9 @@ class ProfileTile extends StatelessWidget {
                   fontWeight: AppFontWeight.regular),
             ),
             const Expanded(child: SizedBox()),
-            Icon(
+            const Icon(
               Iconsax.arrow_right_3,
-               color: AppColor.iconColor,
+              color: Color(0xFFBDBDBD),
             )
           ],
         ),

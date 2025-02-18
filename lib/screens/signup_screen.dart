@@ -62,7 +62,7 @@ class _SignupScreenState extends State<SignupScreen> {
             'id': userCredential.user!.uid,
           });
 
-          context.go('/prompt/${'Id'}');
+          context.go('/mainpage');
           ShadToaster.of(context).show(const ShadToast(
             description: Text('Account Successfully Created'),
           ));

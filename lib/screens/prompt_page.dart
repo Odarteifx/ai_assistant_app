@@ -63,7 +63,6 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
 
       if (querySnapshot.docs.isNotEmpty) {
         setState(() {
-          chatRoomId = querySnapshot.docs.first.id;
           chatRoomCreated = true;
         });
       }
@@ -135,7 +134,7 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
           await _chatServices.sendMessage(
               deepSeekId, chatRoomId, _deepSeekResponse);
           debugPrint('Error: ${response.statusCode} - ${response.body}');
-          _scrollToBottom();
+          
         }
       } catch (e) {
         _deepSeekResponse = 'Error: An exception occurred.';
@@ -157,8 +156,8 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
   void _scrollToBottom() {
     _scrollController.animateTo(
       _scrollController.position.maxScrollExtent,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
     );
   }
 
@@ -330,15 +329,19 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
-        return ListView(
+        return ListView.builder(
           controller: _scrollController,
-          children: snapshot.data!.docs.map((document) {
+          itemCount: snapshot.data!.docs.length,
+          itemBuilder: (context, index) {
+            var document = snapshot.data!.docs[index];
             return buildMessageItem(document);
-          }).toList(),
+          },
+          
         );
       },
     );
   }
+  
 
   Widget buildMessageItem(DocumentSnapshot document) {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;

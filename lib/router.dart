@@ -18,16 +18,19 @@ final GoRouter router = GoRouter(routes: [
     path: '/signup',
     builder: (context, state) => const SignupScreen(),
   ),
-  // GoRoute(
-  //   path: '/mainpage',
-  //   builder: (context, state) => const PromptPage(chatRoomId: 'Id'),
-  // ),
+  GoRoute(
+    path: '/mainpage',
+    builder: (context, state) => const PromptPage(chatRoomId: 'Id'),
+  ),
   GoRoute(
     path: '/prompt/:chatRoomId',
     builder: (context, state) {
       final chatRoomId = state.pathParameters['chatRoomId']!;
       debugPrint(chatRoomId);
-      return PromptPage(chatRoomId: chatRoomId);
+      return PromptPage(
+        key: ValueKey(chatRoomId), // Add this line
+        chatRoomId: chatRoomId,
+      );
     },
   ),
 ]);
