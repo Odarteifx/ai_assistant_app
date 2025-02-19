@@ -115,6 +115,7 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
         _chatServices.sendMessage(user!.uid, chatRoomId, input);
 
     try {
+      final stopwatch = Stopwatch()..start();
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {
@@ -128,6 +129,8 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
           ]
         }),
       );
+      stopwatch.stop();
+      debugPrint('DeepSeek Response Time: ${stopwatch.elapsedMilliseconds}ms');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(utf8.decode(response.bodyBytes));
@@ -149,76 +152,8 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
       _isLoading = false;
     });
 
-    // WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
   }
-
-  // void sendMessage() async {
-  //   input = _inputController.text.trim();
-  //   final user = FirebaseAuth.instance.currentUser;
-  //   const deepSeekId = 'DeepSeekId';
-  //   if (input.isNotEmpty) {
-  //     setState(() {
-  //       _isLoading = true;
-  //       _deepSeekResponse = null;
-  //     });
-  //     _inputController.clear();
-
-  //     if (!chatRoomCreated) {
-  //       await _createChatRoomForUser();
-  //     }
-
-  //     await _chatServices.sendMessage(user!.uid, chatRoomId, input);
-  //     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
-
-  //     try {
-  //       final response = await http.post(Uri.parse(apiUrl),
-  //           headers: {
-  //             'Authorization': 'Bearer $apiKey',
-  //             'Content-Type': 'application/json; charset=utf-8'
-  //           },
-  //           body: jsonEncode({
-  //             'model': 'deepseek/deepseek-chat:free',
-  //             'messages': [
-  //               {"role": "user", "content": input}
-  //             ],
-  //           }));
-  //       if (response.statusCode == 200) {
-  //         final responseData = jsonDecode(utf8.decode(response.bodyBytes));
-  //         _deepSeekResponse = responseData['choices'][0]['message']['content'];
-
-  //         await _chatServices.sendMessage(
-  //             deepSeekId, chatRoomId, _deepSeekResponse!);
-  //         setState(() {
-  //           _isNewDeepSeekResponse = true;
-  //           _isLoading = false;
-  //         });
-  //         WidgetsBinding.instance
-  //             .addPostFrameCallback((_) => _scrollToBottom());
-  //       } else {
-  //         _deepSeekResponse = 'Error: Unable to fetch response from DeepSeek.';
-  //         await _chatServices.sendMessage(
-  //             deepSeekId, chatRoomId, _deepSeekResponse);
-  //         debugPrint('Error: ${response.statusCode} - ${response.body}');
-  //         setState(() {
-  //           _isLoading = false;
-  //         });
-  //         WidgetsBinding.instance
-  //             .addPostFrameCallback((_) => _scrollToBottom());
-  //       }
-  //     } catch (e) {
-  //       _deepSeekResponse = 'Error: An exception occurred.';
-  //       debugPrint('Exception: $e');
-  //       await _chatServices.sendMessage(
-  //           deepSeekId, chatRoomId, _deepSeekResponse!);
-  //       setState(() {
-  //         _isLoading = false;
-  //       });
-  //       WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
-  //     }
-  //   } else {
-  //     _inputController.clear();
-  //   }
-  // }
 
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
