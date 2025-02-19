@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:ai_assistant_app/constants/colors.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -65,8 +66,7 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
         setState(() {
           chatRoomCreated = true;
         });
-      }
-       else {
+      } else {
         chatRoomCreated = false;
       }
     }
@@ -134,7 +134,6 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
           await _chatServices.sendMessage(
               deepSeekId, chatRoomId, _deepSeekResponse);
           debugPrint('Error: ${response.statusCode} - ${response.body}');
-          
         }
       } catch (e) {
         _deepSeekResponse = 'Error: An exception occurred.';
@@ -334,22 +333,22 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
           itemCount: snapshot.data!.docs.length,
           itemBuilder: (context, index) {
             var document = snapshot.data!.docs[index];
-            return buildMessageItem(document);
+            bool isLastMessage = index == snapshot.data!.docs.length - 1;
+            return buildMessageItem(document, isLastMessage);
           },
-          
         );
       },
     );
   }
-  
 
-  Widget buildMessageItem(DocumentSnapshot document) {
+  Widget buildMessageItem(DocumentSnapshot document, bool isLastMessage) {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
 
     var isUser = data['senderId'] == FirebaseAuth.instance.currentUser!.uid;
     var alignment = isUser ? Alignment.bottomRight : Alignment.bottomLeft;
     var color = isUser ? const Color(0xFFFDE8F4) : AppColor.backgroundColor;
     String message = data['message'];
+    List<TextSpan> formatedMessage = _parseMessage(message);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -379,14 +378,32 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
                   borderRadius: BorderRadius.circular(15.sp),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: SelectableText.rich(
-                    TextSpan(
-                      children: _parseMessage(message),
-                    ),
-                    style: TextStyle(fontSize: AppFontSize.subtext),
-                  ),
-                ),
+                    padding: const EdgeInsets.all(8.0),
+                    child: isUser
+                        ? SelectableText.rich(
+                            TextSpan(
+                              children: formatedMessage,
+                            ),
+                            style: TextStyle(fontSize: AppFontSize.subtext),
+                          )
+                        : isLastMessage
+                            ? AnimatedTextKit(
+                                animatedTexts: [
+                                  TypewriterAnimatedText(
+                                      formatedMessage.map((e) => e.text).join(),
+                                      textStyle: TextStyle(
+                                          fontSize: AppFontSize.subtext),
+                                      speed: const Duration(milliseconds: 50))
+                                ],
+                                totalRepeatCount: 1,
+                                pause: const Duration(milliseconds: 1000),
+                                displayFullTextOnTap: true,
+                              )
+                            : SelectableText.rich(
+                                TextSpan(
+                                  children:formatedMessage,
+                                ),
+                              )),
               ),
             ),
           ],

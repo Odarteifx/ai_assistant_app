@@ -2,7 +2,6 @@ import 'package:ai_assistant_app/Services/chat_services.dart';
 import 'package:ai_assistant_app/constants/ai_assets.dart';
 import 'package:ai_assistant_app/constants/colors.dart';
 import 'package:ai_assistant_app/constants/typography.dart';
-import 'package:ai_assistant_app/screens/prompt_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
