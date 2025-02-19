@@ -151,8 +151,6 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
       _isNewDeepSeekResponse = true;
       _isLoading = false;
     });
-
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
   }
 
   void _scrollToBottom() {
@@ -160,7 +158,7 @@ class _PromptPageState extends State<PromptPage> with TickerProviderStateMixin {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
         duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
+        curve: Curves.easeOut,
       );
     }
   }
