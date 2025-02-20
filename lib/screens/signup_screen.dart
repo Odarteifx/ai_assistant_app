@@ -219,11 +219,12 @@ class _SignupScreenState extends State<SignupScreen> {
                           obscureText: obscure,
                           placeholder: const Text('Confirm Password'),
                           validator: (value) {
-                            if (value.isEmpty) {
+                            if (value.isEmpty || (value != _password.text.trim())) {
                               return 'Enter confirmation password';
                             } else {
                               return null;
                             }
+
                           }),
                       Column(
                         children: [
