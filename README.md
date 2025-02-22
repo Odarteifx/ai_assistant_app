@@ -1,16 +1,36 @@
-# ai_assistant_app
+# 🚀 Nova AI – Your Smart AI Assistant 🤖
 
-A new Flutter project.
+Nova AI is a **Flutter-based AI assistant** designed to provide seamless and intelligent conversations. Built with a modern UI and powered by advanced AI, Nova AI offers a smooth user experience while integrating powerful backend services.
 
-## Getting Started
+Video snippet of Nova Ai --> [Click here](https://www.linkedin.com/posts/william-lamptey_flutter-ai-novaai-activity-7298384975542808578-wJlr?utm_source=share&utm_medium=member_ios&rcm=ACoAADGIPuoBllMh0l_aX_deAg55mgc0mx4IskA)
 
-This project is a starting point for a Flutter application.
+## ✨ Features
+- 🗨️ Conversational AI – Powered by **DeepSeek v3 API**
+- 🎨 Sleek UI – Built with **ShadCN UI**
+- 🔥 Cross-Platform – Developed with **Flutter** for Android & iOS
+- ☁️ Cloud Storage & Authentication – **Firebase** integration
 
-A few resources to get you started if this is your first Flutter project:
+## 🛠️ Tech Stack
+- **Flutter** – Cross-platform mobile development
+- **ShadCN UI** – Modern and responsive UI components
+- **Firebase** – Authentication & backend services
+- **DeepSeek v3 API** – AI-powered conversation engine
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 🚧 Current Progress
+✅ Built the UI  
+✅ Integrated Firebase  
+🔄 Working on conversation flow & AI responses  
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📌 Installation
+1. Clone the repo:
+   ```bash
+   git clone https://github.com/Odarteifx/ai_assistant_app.git
+   cd ai_assistant_app
+2. Install dependencies:
+    flutter pub get
+3. Run the app:
+   flutter run
+
+## 🤝 Contributing
+Feel free to fork the repo, make changes, and submit a pull request!
+
